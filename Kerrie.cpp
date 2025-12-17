@@ -19,7 +19,7 @@ NewPing Sonar[SONAR_NUM] = {
 // ----- Servo -----
 Servo myservo;
 
-// ----- Buttons -----
+// ----- Button -----
 #define BTN1_PIN 2
 #define BTN2_PIN 3
 
@@ -74,18 +74,6 @@ void loop() {
   bool btn1Pressed = (btn1State == LOW);
   bool btn2Pressed = (btn2State == LOW);
 
-  // --- Ultrasonic sensors ---
-  int distance1 = Sonar[0].ping_cm();
-  delay(30);
-  int distance2 = Sonar[1].ping_cm();
-  delay(30);
-
-  Serial.print("Left: ");
-  Serial.print(distance1);
-  Serial.print(" cm | Right: ");
-  Serial.print(distance2);
-  Serial.println(" cm");
-
   // --- Servo Control ---
   if (!ServoSpin) {
     if (btn1Pressed) {
@@ -112,7 +100,22 @@ void loop() {
     Serial.println("Servo reset");
   }
 
-  // --- Bin Full LEDs ---
-  digitalWrite(PIN_FULL_L, (distance1 > 0 && distance1 < 15));
-  digitalWrite(PIN_FULL_R, (distance2 > 0 && distance2 < 15));
+  // --- Ultrasonic sensors & Bin Full LEDs ---
+  // Only read sensors if servo is at 90°
+  if (!ServoSpin && myservo.read() == 90) {
+    int distance1 = Sonar[0].ping_cm();
+    delay(30);
+    int distance2 = Sonar[1].ping_cm();
+    delay(30);
+
+    Serial.print("Left: ");
+    Serial.print(distance1);
+    Serial.print(" cm | Right: ");
+    Serial.print(distance2);
+    Serial.println(" cm");
+
+    // Update bin full LEDs
+    digitalWrite(PIN_FULL_L, (distance1 > 0 && distance1 < 15));
+    digitalWrite(PIN_FULL_R, (distance2 > 0 && distance2 < 15));
+  }
 }
