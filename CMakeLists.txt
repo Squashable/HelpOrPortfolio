@@ -3,4 +3,5 @@ project(help118 C)
 
 set(CMAKE_C_STANDARD 23)
 
-add_executable(help118 main.c)
+add_executable(help118 main.c
+        hello.c)
