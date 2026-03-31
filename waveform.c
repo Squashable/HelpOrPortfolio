@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include "io.h"
 
-int main() {
-    PowerData myRecords[1000];  //because there is 100 lines in the csv
+int check() {
+    PowerData myRecords[1000];  //because there is 1000 lines in the csv
 
-    int num_read = collect("ReadFrom.csv", myRecords, 1000);
+    int alive = collect("ReadFrom.csv", myRecords, 1000);
 
-    if (num_read > 0) {
-        printf("Successfully read %d records.\n", num_read);
+    if (alive > 0) {
+        printf("Successfully read %d records.\n", alive);
     } else {
         printf("No data found or error reading file.\n");
         return 2;
