@@ -9,13 +9,12 @@ int collect(const char *filename, PowerData *data_array, int max_records) {
         return 1;
     }
 
-    char line[1024];
+    char line[1000]; //lines of data
     int count = 0;
 
     // Skip the header line
     if (fgets(line, sizeof(line), fp) == NULL) {
         fclose(fp);
-        return 0;
     }
 
     // Read each line and parse using sscanf (comma-separated)

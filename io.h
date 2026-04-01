@@ -1,5 +1,5 @@
 #ifndef IO_H
-#define IO .H
+#define IO_H  // Removed the space and the dot
 
 typedef struct {
     double timestamp;
