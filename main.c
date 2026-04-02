@@ -2,21 +2,22 @@
 #include "io.h"
 #include <stdio.h>
 
-static void welcome(void) {
+int welcome(void) {
     printf("*******************************\n");
     printf("*    ELECTRICAL CALCULATOR    *\n");
     printf("*       Power Summary         *\n");
     printf("*******************************\n");
+    return 0;
 }
 
 static int write_data_file(const PowerData *myRecords, int alive) {
-    FILE *fp = fopen("WriteTo.csv", "w");
+    FILE *fp = fopen("WriteTo.txt", "w");
     if (!fp) {
         perror("Could not open output file");
-        return 1;
+        return 5;
     }
 
-    // Write header
+    // write to .txt file
     fprintf(fp, "timestamp,phase_A_voltage,phase_B_voltage,phase_C_voltage,line_current,frequency,power_factor,thd_percent\n");
 
     // Write each record
