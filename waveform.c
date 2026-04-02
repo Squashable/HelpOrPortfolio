@@ -27,7 +27,7 @@ int check(int argc, char *argv[]) {
 
     return 0;
 }
-int calculations(PowerData *myRecords, int alive) {
+int calculations(PowerData *myRecords, int alive, FILE *out) {
     double sum_sq_A = 0.0, sum_sq_B = 0.0, sum_sq_C = 0.0;
     double sum_v_A  = 0.0, sum_v_B  = 0.0, sum_v_C  = 0.0;
     double vA_max = myRecords[0].phase_A_voltage, vA_min = myRecords[0].phase_A_voltage;
@@ -78,35 +78,35 @@ int calculations(PowerData *myRecords, int alive) {
     double vB_pp  = vB_max - vB_min;
     double vC_pp  = vC_max - vC_min;
 
-    printf("\n--- Power Quality Analysis ---\n");
-    printf("Phase A RMS: %.1f V", vA_rms);
+    fprintf(out, "\n--- Power Quality Analysis ---\n");
+    fprintf(out, "Phase A RMS: %.1f V", vA_rms);
     if (vA_rms >= 207.0 && vA_rms <= 253.0)
-        printf(" (within 207-253 V tolerance band - COMPLIANT)\n");
+        fprintf(out, " (within 207-253 V tolerance band - COMPLIANT)\n");
     else
-        printf(" (NON-COMPLIANT)\n");
-    printf("Phase A peak-to-peak: %.1f V\n", vA_pp);
-    printf("Phase A DC offset: %.2f V\n", vA_dc);
+        fprintf(out, " (NON-COMPLIANT)\n");
+    fprintf(out, "Phase A peak-to-peak: %.1f V\n", vA_pp);
+    fprintf(out, "Phase A DC offset: %.2f V\n", vA_dc);
 
-    printf("Phase B RMS: %.1f V", vB_rms);
+    fprintf(out, "Phase B RMS: %.1f V", vB_rms);
     if (vB_rms >= 207.0 && vB_rms <= 253.0)
-        printf(" (COMPLIANT)\n");
+        fprintf(out, " (COMPLIANT)\n");
     else
-        printf(" (NON-COMPLIANT)\n");
-    printf("Phase B peak-to-peak: %.1f V\n", vB_pp);
-    printf("Phase B DC offset: %.2f V\n", vB_dc);
+        fprintf(out, " (NON-COMPLIANT)\n");
+    fprintf(out, "Phase B peak-to-peak: %.1f V\n", vB_pp);
+    fprintf(out, "Phase B DC offset: %.2f V\n", vB_dc);
 
-    printf("Phase C RMS: %.1f V", vC_rms);
+    fprintf(out, "Phase C RMS: %.1f V", vC_rms);
     if (vC_rms >= 207.0 && vC_rms <= 253.0)
-        printf(" (COMPLIANT)\n");
+        fprintf(out, " (COMPLIANT)\n");
     else
-        printf(" (NON-COMPLIANT)\n");
-    printf("Phase C peak-to-peak: %.1f V\n", vC_pp);
-    printf("Phase C DC offset: %.2f V\n", vC_dc);
+        fprintf(out, " (NON-COMPLIANT)\n");
+    fprintf(out, "Phase C peak-to-peak: %.1f V\n", vC_pp);
+    fprintf(out, "Phase C DC offset: %.2f V\n", vC_dc);
 
-    printf("Clipped samples (|V| >= 324.9 V, any phase): %d samples total\n", clipped);
-    printf("Frequency range: %.3f Hz to %.3f Hz\n", freq_min, freq_max);
-    printf("Power factor range: %.3f to %.3f\n", pf_min, pf_max);
-    printf("THD range: %.2f%% to %.2f%%\n", thd_min, thd_max);
+    fprintf(out, "Clipped samples (|V| >= 324.9 V, any phase): %d samples total\n", clipped);
+    fprintf(out, "Frequency range: %.3f Hz to %.3f Hz\n", freq_min, freq_max);
+    fprintf(out, "Power factor range: %.3f to %.3f\n", pf_min, pf_max);
+    fprintf(out, "THD range: %.2f%% to %.2f%%\n", thd_min, thd_max);
 
     return 0;
 }

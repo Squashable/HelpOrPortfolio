@@ -10,31 +10,18 @@ int welcome(void) {
     return 0;
 }
 
-static int write_data_file(const PowerData *myRecords, int alive) {
+static int write_data_file(PowerData *myRecords, int alive) {
     FILE *fp = fopen("WriteTo.txt", "w");
     if (!fp) {
         perror("Could not open output file");
         return 5;
     }
 
-    // write to .txt file
-    fprintf(fp, "timestamp,phase_A_voltage,phase_B_voltage,phase_C_voltage,line_current,frequency,power_factor,thd_percent\n");
-
-    // Write each record
-    for (int i = 0; i < alive; i++) {
-        fprintf(fp, "%f,%f,%f,%f,%f,%f,%f,%f\n",
-            myRecords[i].timestamp,
-            myRecords[i].phase_A_voltage,
-            myRecords[i].phase_B_voltage,
-            myRecords[i].phase_C_voltage,
-            myRecords[i].line_current,
-            myRecords[i].frequency,
-            myRecords[i].power_factor,
-            myRecords[i].thd_percent);
-    }
+    // Write the Power Quality Analysis report to the file
+    calculations(myRecords, alive, fp);
 
     fclose(fp);
-    printf("Data written to WriteTo.csv\n");
+    printf("Data written to WriteTo.txt\n");
     return 0;
 }
 
@@ -51,7 +38,7 @@ int main(int argc, char *argv[]) {
         return 2;
     }
 
-    calculations(myRecords, alive);
+    calculations(myRecords, alive, stdout);
     write_data_file(myRecords, alive);
 
     return 0;
