@@ -18,8 +18,8 @@ typedef struct {
     FILE *fp;
 } CsvReader;
 
-int  csv_open (CsvReader *reader, const char *filename);
-int  csv_next (CsvReader *reader, PowerData *out);
-void csv_close(CsvReader *reader);
+CsvReader *csv_open (const char *filename);
+int        csv_next (CsvReader *reader, PowerData *out);
+void       csv_close(CsvReader *reader);
 
 #endif

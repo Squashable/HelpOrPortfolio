@@ -1,10 +1,11 @@
 #include "waveform.h"
+#include "io.h"
 #include <stdio.h>
 #include <math.h>
 
 int analyse(const char *filename, FILE *out) {
-    CsvReader reader;
-    if (!csv_open(&reader, filename)) return 1;
+    CsvReader *reader = csv_open(filename);
+    if (!reader) return 1;
 
     double sum_sq_A = 0.0, sum_sq_B = 0.0, sum_sq_C = 0.0;
     double sum_v_A  = 0.0, sum_v_B  = 0.0, sum_v_C  = 0.0;
@@ -12,8 +13,10 @@ int analyse(const char *filename, FILE *out) {
     double freq_min, freq_max, pf_min, pf_max, thd_min, thd_max;
     int clipped = 0, count = 0;
 
+    int result;
     PowerData r;
-    while (csv_next(&reader, &r)) {
+
+    while ((result = csv_next(reader, &r)) == 1) {
         double vA = r.phase_A_voltage;
         double vB = r.phase_B_voltage;
         double vC = r.phase_C_voltage;
@@ -54,7 +57,13 @@ int analyse(const char *filename, FILE *out) {
         count++;
     }
 
-    csv_close(&reader);
+    csv_close(reader);
+    reader = NULL;
+
+    if (result == -1) {
+        fprintf(stderr, "Error: file read failed mid-way through %s\n", filename);
+        return 3;
+    }
 
     if (count == 0) {
         fprintf(out, "No valid records found.\n");

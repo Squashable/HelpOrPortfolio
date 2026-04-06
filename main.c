@@ -5,7 +5,6 @@ int welcome(void) {
     printf("*******************************\n");
     printf("*    ELECTRICAL CALCULATOR    *\n");
     printf("*       Power Summary         *\n");
-    printf("*      please work :|         *\n");
     printf("*******************************\n");
     return 0;
 }
@@ -14,9 +13,10 @@ int main(void) {
     welcome();
 
     // Print to terminal
-    if (analyse("ReadFrom.csv", stdout) != 0) {
-        printf("Error analysing data.\n");
-        return 2;
+    int status = analyse("ReadFrom.csv", stdout);
+    if (status != 0) {
+        fprintf(stderr, "Analysis failed with error code %d\n", status);
+        return status;
     }
 
     // Write to file
@@ -25,9 +25,15 @@ int main(void) {
         perror("Could not open output file");
         return 5;
     }
-    analyse("ReadFrom.csv", fp);
-    fclose(fp);
-    printf("\nData written to WriteTo.txt\n");
 
+    status = analyse("ReadFrom.csv", fp);
+    fclose(fp);
+
+    if (status != 0) {
+        fprintf(stderr, "Failed writing to file, error code %d\n", status);
+        return status;
+    }
+
+    printf("Data written to WriteTo.txt\n");
     return 0;
 }
