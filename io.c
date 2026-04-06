@@ -1,39 +1,41 @@
 #include "io.h"
-#include <string.h>
 #include <stdio.h>
 
-int collect(const char *filename, PowerData *data_array, int max_records) {
-    FILE *fp = fopen(filename, "r");
-    if (!fp) {
+int csv_open(CsvReader *reader, const char *filename) {
+    reader->fp = fopen(filename, "r");
+    if (!reader->fp) {
         perror("Could not open file");
-        return 1;
+        return 0;
     }
-
-    char line[1000]; //lines of data
-    int count = 0;
-
-    // Skip the header line
-    if (fgets(line, sizeof(line), fp) == NULL) {
-        fclose(fp);
+    char line[256];
+    // Skip header line
+    if (fgets(line, sizeof(line), reader->fp) == NULL) {
+        fclose(reader->fp);
+        return 0;
     }
+    return 1;
+}
 
-    // Read each line and parse using sscanf (comma-separated)
-    while (fgets(line, sizeof(line), fp) && count < max_records) {
+int csv_next(CsvReader *reader, PowerData *out) {
+    char line[256];
+    while (fgets(line, sizeof(line), reader->fp)) {
         int fields = sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf",
-            &data_array[count].timestamp,
-            &data_array[count].phase_A_voltage,
-            &data_array[count].phase_B_voltage,
-            &data_array[count].phase_C_voltage,
-            &data_array[count].line_current,
-            &data_array[count].frequency,
-            &data_array[count].power_factor,
-            &data_array[count].thd_percent);
-
-        if (fields == 8) {
-            count++;
-        }
+            &out->timestamp,
+            &out->phase_A_voltage,
+            &out->phase_B_voltage,
+            &out->phase_C_voltage,
+            &out->line_current,
+            &out->frequency,
+            &out->power_factor,
+            &out->thd_percent);
+        if (fields == 8) return 1;
     }
+    return 0;
+}
 
-    fclose(fp);
-    return count;
+void csv_close(CsvReader *reader) {
+    if (reader->fp) {
+        fclose(reader->fp);
+        reader->fp = NULL;
+    }
 }

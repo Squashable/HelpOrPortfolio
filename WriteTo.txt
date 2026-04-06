@@ -1,5 +1,5 @@
 
---- Power Quality Analysis ---
+ --- :) Power Quality Analysis :) ---
 Phase A RMS: 229.8 V (within 207-253 V tolerance band - COMPLIANT)
 Phase A peak-to-peak: 650.0 V
 Phase A DC offset: -0.00 V

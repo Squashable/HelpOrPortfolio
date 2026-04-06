@@ -2,47 +2,31 @@
 #include <stdio.h>
 #include <math.h>
 
-int check(int argc, char *argv[]) {
-    PowerData myRecords[1000];
+int analyse(const char *filename, FILE *out) {
+    CsvReader reader;
+    if (!csv_open(&reader, filename)) return 1;
 
-    int alive = collect("ReadFrom.csv", myRecords, 1000);
-
-    if (alive > 0) {
-        printf("Successfully read %d records.\n", alive);
-        for (int i = 0; i < 1; i++) {
-            printf("Record %d:\n", i);
-            printf("  timestamp:       %f\n", myRecords[i].timestamp);
-            printf("  phase_A_voltage: %f\n", myRecords[i].phase_A_voltage);
-            printf("  phase_B_voltage: %f\n", myRecords[i].phase_B_voltage);
-            printf("  phase_C_voltage: %f\n", myRecords[i].phase_C_voltage);
-            printf("  line_current:    %f\n", myRecords[i].line_current);
-            printf("  frequency:       %f\n", myRecords[i].frequency);
-            printf("  power_factor:    %f\n", myRecords[i].power_factor);
-            printf("  thd_percent:     %f\n", myRecords[i].thd_percent);
-        }
-    } else {
-        printf("No data found or error reading file.\n");
-        return 2;
-    }
-
-    return 0;
-}
-int calculations(PowerData *myRecords, int alive, FILE *out) {
     double sum_sq_A = 0.0, sum_sq_B = 0.0, sum_sq_C = 0.0;
     double sum_v_A  = 0.0, sum_v_B  = 0.0, sum_v_C  = 0.0;
-    double vA_max = myRecords[0].phase_A_voltage, vA_min = myRecords[0].phase_A_voltage;
-    double vB_max = myRecords[0].phase_B_voltage, vB_min = myRecords[0].phase_B_voltage;
-    double vC_max = myRecords[0].phase_C_voltage, vC_min = myRecords[0].phase_C_voltage;
-    double freq_min = myRecords[0].frequency,     freq_max = myRecords[0].frequency;
-    double pf_min   = myRecords[0].power_factor,  pf_max  = myRecords[0].power_factor;
-    double thd_min  = myRecords[0].thd_percent,   thd_max = myRecords[0].thd_percent;
-    int    clipped  = 0;
-    double N = alive;
+    double vA_max, vA_min, vB_max, vB_min, vC_max, vC_min;
+    double freq_min, freq_max, pf_min, pf_max, thd_min, thd_max;
+    int clipped = 0, count = 0;
 
-    for (int i = 0; i < alive; i++) {
-        double vA = myRecords[i].phase_A_voltage;
-        double vB = myRecords[i].phase_B_voltage;
-        double vC = myRecords[i].phase_C_voltage;
+    PowerData r;
+    while (csv_next(&reader, &r)) {
+        double vA = r.phase_A_voltage;
+        double vB = r.phase_B_voltage;
+        double vC = r.phase_C_voltage;
+
+        // Initialise min/max from first valid record
+        if (count == 0) {
+            vA_max = vA_min = vA;
+            vB_max = vB_min = vB;
+            vC_max = vC_min = vC;
+            freq_min = freq_max = r.frequency;
+            pf_min   = pf_max   = r.power_factor;
+            thd_min  = thd_max  = r.thd_percent;
+        }
 
         sum_sq_A += vA * vA;
         sum_sq_B += vB * vB;
@@ -60,14 +44,24 @@ int calculations(PowerData *myRecords, int alive, FILE *out) {
 
         if (fabs(vA) >= 324.9 || fabs(vB) >= 324.9 || fabs(vC) >= 324.9) clipped++;
 
-        if (myRecords[i].frequency    < freq_min) freq_min = myRecords[i].frequency;
-        if (myRecords[i].frequency    > freq_max) freq_max = myRecords[i].frequency;
-        if (myRecords[i].power_factor < pf_min)   pf_min   = myRecords[i].power_factor;
-        if (myRecords[i].power_factor > pf_max)   pf_max   = myRecords[i].power_factor;
-        if (myRecords[i].thd_percent  < thd_min)  thd_min  = myRecords[i].thd_percent;
-        if (myRecords[i].thd_percent  > thd_max)  thd_max  = myRecords[i].thd_percent;
+        if (r.frequency    < freq_min) freq_min = r.frequency;
+        if (r.frequency    > freq_max) freq_max = r.frequency;
+        if (r.power_factor < pf_min)   pf_min   = r.power_factor;
+        if (r.power_factor > pf_max)   pf_max   = r.power_factor;
+        if (r.thd_percent  < thd_min)  thd_min  = r.thd_percent;
+        if (r.thd_percent  > thd_max)  thd_max  = r.thd_percent;
+
+        count++;
     }
 
+    csv_close(&reader);
+
+    if (count == 0) {
+        fprintf(out, "No valid records found.\n");
+        return 2;
+    }
+
+    double N      = count;
     double vA_rms = sqrt(sum_sq_A / N);
     double vB_rms = sqrt(sum_sq_B / N);
     double vC_rms = sqrt(sum_sq_C / N);
@@ -78,7 +72,8 @@ int calculations(PowerData *myRecords, int alive, FILE *out) {
     double vB_pp  = vB_max - vB_min;
     double vC_pp  = vC_max - vC_min;
 
-    fprintf(out, "\n--- Power Quality Analysis ---\n");
+    fprintf(out, "\n --- :) Power Quality Analysis :) ---\n");
+
     fprintf(out, "Phase A RMS: %.1f V", vA_rms);
     if (vA_rms >= 207.0 && vA_rms <= 253.0)
         fprintf(out, " (within 207-253 V tolerance band - COMPLIANT)\n");

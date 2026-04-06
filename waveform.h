@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include "io.h"
 
-int check(int argc, char *argv[]);
-int calculations(PowerData *myRecords, int alive, FILE *out);
+int analyse(const char *filename, FILE *out);
 
-#endif // WAVEFORM_H
+#endif

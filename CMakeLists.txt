@@ -8,3 +8,5 @@ add_executable(help118
         waveform.c
         io.c
         main.c)
+
+target_link_libraries(help118 m)

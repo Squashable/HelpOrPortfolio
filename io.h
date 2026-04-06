@@ -1,5 +1,7 @@
 #ifndef IO_H
-#define IO_H  // Removed the space and the dot
+#define IO_H
+
+#include <stdio.h>
 
 typedef struct {
     double timestamp;
@@ -12,5 +14,12 @@ typedef struct {
     double thd_percent;
 } PowerData;
 
-int collect(const char *filename, PowerData *data_array, int max_records);
+typedef struct {
+    FILE *fp;
+} CsvReader;
+
+int  csv_open (CsvReader *reader, const char *filename);
+int  csv_next (CsvReader *reader, PowerData *out);
+void csv_close(CsvReader *reader);
+
 #endif
